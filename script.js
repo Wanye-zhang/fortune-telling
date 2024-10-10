@@ -198,41 +198,78 @@ document.addEventListener('DOMContentLoaded', function() {
         const zodiacSign = getZodiacSign(birthdateValue);
         const astrologyPrediction = getAstrologyPrediction(zodiacSign);
         const crystalBallPrediction = getCrystalBallPrediction();
-        const palmistryReading = getPalmistryReading();
-        const fortune = generateDetailedFortune(nameValue, nameAnalysis, bazi, yijing, tarot, zodiacSign, astrologyPrediction, crystalBallPrediction, palmistryReading);
+        const fortune = generateDetailedFortune(nameValue, nameAnalysis, bazi, yijing, tarot, zodiacSign, astrologyPrediction, crystalBallPrediction);
         
-        document.getElementById('nameAnalysis').innerHTML = `<h3>姓名分析</h3>${getNameAnalysisContent(nameValue, nameAnalysis)}`;
-        document.getElementById('bazi').innerHTML = `<h3>八字</h3><p>${bazi.pillars.join(' ')}</p>`;
-        document.getElementById('yijing').innerHTML = `<h3>易经解读</h3><p>${yijing.interpretation || '无法解读'}</p>`;
-        document.getElementById('tarot').innerHTML = `<h3>塔罗牌</h3><p>${tarot.name}: ${tarot.meaning}</p>`;
-        document.getElementById('astrology').innerHTML = `<h3>星座运势</h3><p>${zodiacSign}: ${astrologyPrediction}</p>`;
-        document.getElementById('crystalBall').innerHTML = `<h3>水晶球预言</h3><p>${crystalBallPrediction}</p>`;
-        document.getElementById('palmistry').innerHTML = `<h3>手相解读</h3><p>${palmistryReading}</p>`;
-        document.getElementById('fortune').innerHTML = `<h3>详细解析</h3>${fortune}`;
+        const resultHTML = `
+            <div class="result-section name-analysis">
+                <h3>姓名分析</h3>
+                ${getNameAnalysisContent(nameValue, nameAnalysis)}
+            </div>
+            <div class="result-section bazi">
+                <h3>八字解析</h3>
+                <p>您的八字：${bazi.pillars.join(' ')}</p>
+                <p>五行属性：${bazi.elements.join(', ')}</p>
+                <p>${getBaziInterpretation(bazi)}</p>
+            </div>
+            <div class="result-section yijing">
+                <h3>易经解读</h3>
+                <p>${yijing.interpretation}</p>
+            </div>
+            <div class="result-section tarot">
+                <h3>塔罗牌</h3>
+                <p>${tarot.name}: ${tarot.meaning}</p>
+            </div>
+            <div class="result-section astrology">
+                <h3>星座运势</h3>
+                <p>${zodiacSign}: ${astrologyPrediction}</p>
+            </div>
+            <div class="result-section crystal-ball">
+                <h3>水晶球预言</h3>
+                <p>${crystalBallPrediction}</p>
+            </div>
+            <div class="result-section fortune">
+                <h3>详细解析</h3>
+                ${fortune}
+            </div>
+        `;
         
+        resultContainer.innerHTML = resultHTML;
         resultContainer.classList.remove('hidden');
         resultContainer.style.opacity = '1';
         isRotating = false;
+
+        // 添加动画效果
+        const sections = document.querySelectorAll('.result-section');
+        sections.forEach((section, index) => {
+            setTimeout(() => {
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+            }, index * 200);
+        });
     }
 
     function getNameAnalysisContent(name, nameAnalysis) {
         if (!name || !nameAnalysis) return '无法分析姓名';
         return `
         <p><strong>姓名：</strong>${name}</p>
-        <p>您的名字蕴含 ${nameAnalysis.element || '未知'} 的特质，与 ${nameAnalysis.direction || '未知'} 方位相呼应。
-        ${nameAnalysis.color || '未知'}色可能会给您带来好运。根据五行理论，您的名字总体运势为${nameAnalysis.luck || '未知'}。</p>
-        <p>名字得分：${nameAnalysis.score || '0'}分 - ${getNameScoreInterpretation(nameAnalysis.score || 0)}</p>
+        <p><strong>五行属性：</strong>${nameAnalysis.element}</p>
+        <p><strong>方位：</strong>${nameAnalysis.direction}</p>
+        <p><strong>幸运色：</strong>${nameAnalysis.color}</p>
+        <p><strong>总体运势：</strong>${nameAnalysis.luck}</p>
+        <p><strong>名字得分：</strong>${nameAnalysis.score}分 - ${getNameScoreInterpretation(nameAnalysis.score)}</p>
         `;
     }
 
-    function generateDetailedFortune(name, nameAnalysis, bazi, yijing, tarot, zodiacSign, astrologyPrediction, crystalBallPrediction, palmistryReading) {
-        if (!bazi || !yijing || !tarot) return '无法生成详细解析';
+    function getBaziInterpretation(bazi) {
+        const elementStrengths = bazi.elements.map((element, index) => {
+            const strength = ['弱', '中', '强'][Math.floor(element / 2)];
+            return `${element}${strength}`;
+        }).join('，');
 
-        const elements = ['木', '火', '土', '金', '水'];
-        const elementStrengths = elements.map((element, index) => 
-            `${element}：${['弱', '中', '强'][Math.floor((bazi.elements[index] || 0) / 2)]}`
-        ).join('，');
-        
+        return `您的八字显示：${elementStrengths}。这表明您在生命中可能会经历${bazi.elements.length}个主要阶段，每个阶段都有其独特的挑战和机遇。`;
+    }
+
+    function generateDetailedFortune(name, nameAnalysis, bazi, yijing, tarot, zodiacSign, astrologyPrediction, crystalBallPrediction) {
         const lifeAspects = ['事业', '财运', '姻缘', '健康'];
         const fortuneDetails = lifeAspects.map(aspect => {
             const score = Math.floor(Math.random() * 100) + 1;
@@ -241,26 +278,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
 
         return `
-        <p><strong>八字分析：</strong>您的八字为 ${bazi.pillars.join(' ')}。
-        五行强弱：${elementStrengths}。
-        这表明${yijing.interpretation || '无法解读'}</p>
-        
         ${fortuneDetails}
-        
-        <p><strong>星座运势：</strong>${zodiacSign} - ${astrologyPrediction}</p>
-        
-        <p><strong>塔罗牌指引：</strong>${tarot.name} - ${tarot.meaning}</p>
-        
-        <p><strong>水晶球预言：</strong>${crystalBallPrediction}</p>
-        
-        <p><strong>手相解读：</strong>${palmistryReading}</p>
-        
         <p><strong>命运解读：</strong>${getFateInterpretation(bazi, yijing, tarot)}</p>
-        
-        <p><strong>综合建议：</strong><br>
-        1. ${getAdvice(bazi, yijing, tarot)}。<br>
-        2. ${getAdvice(bazi, yijing, tarot)}。<br>
-        3. ${getAdvice(bazi, yijing, tarot)}。</p>
+        <p><strong>综合建议：</strong></p>
+        <ul>
+            <li>${getAdvice(bazi, yijing, tarot)}</li>
+            <li>${getAdvice(bazi, yijing, tarot)}</li>
+            <li>${getAdvice(bazi, yijing, tarot)}</li>
+        </ul>
         `;
     }
 
@@ -285,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return {
             pillars: [yearStem + yearBranch, monthStem + monthBranch, dayStem + dayBranch, hourStem + hourBranch],
-            elements: [1, 1, 1, 1, 1] // 简化版本，实际应该根据八字计算五行强弱
+            elements: [getElement(yearStem), getElement(monthStem), getElement(dayStem), getElement(hourStem)]
         };
     }
 
