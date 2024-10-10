@@ -36,7 +36,7 @@ function getAstrologyPrediction(zodiacSign) {
         "射手座": "冒险精神高涨，可能有新的旅行或学习机会，保持乐观。",
         "摩羯座": "事业运势上升，努力将得到回报，注意劳逸结合。"
     };
-    return predictions[zodiacSign] || "星座预测暂时无法获取。";
+    return predictions[zodiacSign] || "星座预测暂时获取。";
 }
 
 function getCrystalBallPrediction() {
@@ -68,13 +68,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const birthdate = document.getElementById('birthdate');
     const birthtimeHour = document.getElementById('birthtime-hour');
     const birthtimeMinute = document.getElementById('birthtime-minute');
-    const minuteGroup = document.getElementById('minute-group');
     const fortuneForm = document.getElementById('fortuneForm');
     const cardContainer = document.getElementById('card-container');
     const resultContainer = document.getElementById('result');
     const card = document.querySelector('.card');
     const modal = document.getElementById('resultModal');
     const closeBtn = document.querySelector('.close');
+    const minuteGroup = document.getElementById('minute-group');
+
+    let hasRevealed = false;
 
     // 初始化日期选择器
     flatpickr(birthdate, {
@@ -87,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
     for (let i = 0; i < 24; i++) {
         const option = document.createElement('option');
         option.value = i;
-        option.textContent = `${i.toString().padStart(2, '0')}:00`;
+        option.textContent = `${i.toString().padStart(2, '0')}时`;
         birthtimeHour.appendChild(option);
     }
 
@@ -96,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
     for (let i = 0; i < 60; i++) {
         const option = document.createElement('option');
         option.value = i;
-        option.textContent = i.toString().padStart(2, '0');
+        option.textContent = `${i.toString().padStart(2, '0')}分`;
         birthtimeMinute.appendChild(option);
     }
 
@@ -106,83 +108,100 @@ document.addEventListener('DOMContentLoaded', function() {
             minuteGroup.classList.remove('hidden');
         } else {
             minuteGroup.classList.add('hidden');
+            birthtimeMinute.value = ''; // 重置分钟选择
         }
     });
-
-    // 生成卡牌图片
-    function generateCardImage(isfront) {
-        const canvas = document.createElement('canvas');
-        canvas.width = 300;
-        canvas.height = 450;
-        const ctx = canvas.getContext('2d');
-
-        ctx.fillStyle = '#1C1C1E';
-        ctx.fillRect(0, 0, 300, 450);
-
-        ctx.fillStyle = '#007AFF';
-        ctx.font = 'bold 80px Noto Sans SC';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(isfront ? '命' : '运', 150, 225);
-
-        ctx.strokeStyle = '#007AFF';
-        ctx.lineWidth = 10;
-        ctx.strokeRect(10, 10, 280, 430);
-
-        return canvas.toDataURL();
-    }
-
-    // 设置卡牌图片
-    document.querySelector('.card-front').style.backgroundImage = `url(${generateCardImage(true)})`;
-    document.querySelector('.card-back').style.backgroundImage = `url(${generateCardImage(false)})`;
 
     // 表单提交事件
     fortuneForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        if (isRotating) return; // 防止重复提交
+        if (hasRevealed) {
+            alert("天机已揭示，请刷新页面重新开始。");
+            return;
+        }
         
-        isRotating = true;
-        modal.style.display = 'block'; // 使用 style.display 而不是 classList
+        hasRevealed = true;
+        modal.style.display = 'block';
         card.classList.remove('flipped');
         resultContainer.classList.add('hidden');
         startRotation();
     });
 
     function startRotation() {
-        let rotation = 0;
-        const totalRotation = 1080; // 3 full rotations
-        const duration = 3000; // 3 seconds
-        const startTime = Date.now();
+        const cardFront = document.querySelector('.card-front');
+        const cardBack = document.querySelector('.card-back');
+        const phrases = ['我自踏雪至山巅', '无人扶我青云志'];
+        const centerPhrase = '逆天改命';
+        
+        cardFront.innerHTML = cardBack.innerHTML = `
+            <div class="phrase-container">
+                <div class="phrase left"></div>
+                <div class="phrase center"></div>
+                <div class="phrase right"></div>
+            </div>
+        `;
 
-        function rotate() {
-            const currentTime = Date.now();
-            const progress = (currentTime - startTime) / duration;
+        const frontPhrases = cardFront.querySelectorAll('.phrase');
+        const backPhrases = cardBack.querySelectorAll('.phrase');
 
-            if (progress < 1) {
-                rotation = easeInQuad(progress) * totalRotation;
-                card.style.transform = `rotateY(${rotation}deg)`;
-                requestAnimationFrame(rotate);
-            } else {
-                card.style.transform = `rotateY(${totalRotation}deg)`;
-                setTimeout(showResult, 500);
+        function showCharacter(element, phrase, index) {
+            if (index < phrase.length) {
+                element.textContent += phrase[index];
+                setTimeout(() => showCharacter(element, phrase, index + 1), 100);
+            } else if (element.classList.contains('center') && index === phrase.length) {
+                setTimeout(rotateCard, 500);
             }
         }
 
-        function easeInQuad(t) {
-            return t * t;
+        function showPhrases() {
+            showCharacter(frontPhrases[0], phrases[0], 0);
+            showCharacter(frontPhrases[2], phrases[1], 0);
+            backPhrases[0].textContent = phrases[0];
+            backPhrases[2].textContent = phrases[1];
+
+            setTimeout(() => {
+                showCharacter(frontPhrases[1], centerPhrase, 0);
+                backPhrases[1].textContent = centerPhrase;
+            }, Math.max(phrases[0].length, phrases[1].length) * 100 + 500);
         }
 
-        rotate();
-    }
+        function rotateCard() {
+            let rotation = 0;
+            let speed = 0.1; // 开始时更慢
+            const maxSpeed = 50; // 最大速度更快
+            const totalRotation = 1800; // 5 full rotations
+            const duration = 8000; // 增加到8秒
+            const startTime = Date.now();
 
-    closeBtn.onclick = function() {
-        modal.style.display = 'none'; // 使用 style.display
-    }
+            function rotate() {
+                const currentTime = Date.now();
+                const progress = (currentTime - startTime) / duration;
 
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none'; // 使用 style.display
+                if (progress < 1) {
+                    rotation = easeInOutQuad(progress) * totalRotation;
+                    speed = easeInQuint(progress) * maxSpeed;
+                    card.style.transform = `rotateY(${rotation}deg)`;
+                    card.style.filter = `blur(${Math.min(speed / 3, 15)}px)`;
+                    requestAnimationFrame(rotate);
+                } else {
+                    card.style.transform = `rotateY(${totalRotation}deg)`;
+                    card.style.filter = 'blur(0)';
+                    setTimeout(showResult, 500);
+                }
+            }
+
+            function easeInOutQuad(t) {
+                return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            }
+
+            function easeInQuint(t) {
+                return t * t * t * t * t;
+            }
+
+            rotate();
         }
+
+        showPhrases();
     }
 
     function showResult() {
@@ -234,39 +253,54 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         resultContainer.innerHTML = resultHTML;
-        resultContainer.classList.remove('hidden');
-        resultContainer.style.opacity = '1';
-        isRotating = false;
+        
+        setTimeout(() => {
+            cardContainer.style.display = 'none';
+            resultContainer.classList.remove('hidden');
+            resultContainer.style.opacity = '1';
+            
+            resultContainer.scrollIntoView({ behavior: 'smooth' });
 
-        // 添加动画效果
-        const sections = document.querySelectorAll('.result-section');
-        sections.forEach((section, index) => {
-            setTimeout(() => {
-                section.style.opacity = '1';
-                section.style.transform = 'translateY(0)';
-            }, index * 200);
-        });
+            const sections = document.querySelectorAll('.result-section');
+            sections.forEach((section, index) => {
+                setTimeout(() => {
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }, 500);
+    }
+
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
     }
 
     function getNameAnalysisContent(name, nameAnalysis) {
         if (!name || !nameAnalysis) return '无法分析姓名';
         return `
         <p><strong>姓名：</strong>${name}</p>
-        <p><strong>五行属性：</strong>${nameAnalysis.element}</p>
-        <p><strong>方位：</strong>${nameAnalysis.direction}</p>
-        <p><strong>幸运色：</strong>${nameAnalysis.color}</p>
-        <p><strong>总体运势：</strong>${nameAnalysis.luck}</p>
-        <p><strong>名字得分：</strong>${nameAnalysis.score}分 - ${getNameScoreInterpretation(nameAnalysis.score)}</p>
+        <p><strong>五行属性：</strong>${nameAnalysis.element || '未知'}</p>
+        <p><strong>方位：</strong>${nameAnalysis.direction || '未知'}</p>
+        <p><strong>幸运色：</strong>${nameAnalysis.color || '未知'}</p>
+        <p><strong>总体运势：</strong>${nameAnalysis.luck || '未知'}</p>
+        <p><strong>名字得分：</strong>${nameAnalysis.score || 0}分 - ${getNameScoreInterpretation(nameAnalysis.score || 0)}</p>
         `;
     }
 
     function getBaziInterpretation(bazi) {
         const elementStrengths = bazi.elements.map((element, index) => {
-            const strength = ['弱', '中', '强'][Math.floor(element / 2)];
+            if (element === '未知') return '未知';
+            const strength = ['弱', '中', '强'][Math.floor(Math.random() * 3)]; // 简化的强度计
             return `${element}${strength}`;
         }).join('，');
 
-        return `您的八字显示：${elementStrengths}。这表明您在生命中可能会经历${bazi.elements.length}个主要阶段，每个阶段都有其独特的挑战和机遇。`;
+        return `您的八字显示：${elementStrengths}。这表明您的生命中包含多元素的影响，每个元素都为您带来独特的特质和机遇。`;
     }
 
     function generateDetailedFortune(name, nameAnalysis, bazi, yijing, tarot, zodiacSign, astrologyPrediction, crystalBallPrediction) {
@@ -292,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateBaZi(birthdate, hour, minute) {
         // 实现八字计算逻辑
         // 这里使用简化版本
-        const heavenlyStems = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
+        const heavenlyStems = ['', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
         const earthlyBranches = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
         
         const year = birthdate.getFullYear();
@@ -310,7 +344,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return {
             pillars: [yearStem + yearBranch, monthStem + monthBranch, dayStem + dayBranch, hourStem + hourBranch],
-            elements: [getElement(yearStem), getElement(monthStem), getElement(dayStem), getElement(hourStem)]
+            elements: [
+                getElement(yearStem) || '未知',
+                getElement(monthStem) || '未知',
+                getElement(dayStem) || '未知',
+                getElement(hourStem) || '未知'
+            ]
         };
     }
 
@@ -325,25 +364,25 @@ document.addEventListener('DOMContentLoaded', function() {
             '辰': '土', '巳': '火', '午': '火', '未': '土',
             '申': '金', '酉': '金', '戌': '土', '亥': '水'
         };
-        return elementMap[character];
+        return elementMap[character] || '未知';
     }
 
     function interpretYijing(bazi) {
         const hexagrams = [
-            { name: '乾卦', meaning: '象征天，代表强健、刚毅、创造、领导' },
-            { name: '坤卦', meaning: '象征，代表柔顺、包容、滋养、支持' },
+            { name: '乾卦', meaning: '象征，代表强健、刚、创造、领导' },
+            { name: '坤卦', meaning: '象征，代表柔顺、包容滋养、支持' },
             { name: '屯卦', meaning: '象征初始，代表开始、困难、潜力、需要耐心' },
             { name: '蒙卦', meaning: '象征蒙昧，代表启蒙、教育、成长、需要指导' },
             { name: '需卦', meaning: '象征等待，代表耐心、适时行动、准备、机遇' },
             { name: '讼卦', meaning: '象征争讼，代表冲突、辩论、需要调解、谨慎' },
-            { name: '师卦', meaning: '象征军队，代表纪律、组织、领导、团结' },
-            { name: '比卦', meaning: '象征亲比，代表联合、和谐、交流、共情' }
+            { name: '师卦', meaning: '象征军队，代表纪律、组、领导、团结' },
+            { name: '比卦', meaning: '象征亲，代表合、和谐、交流、情' }
         ];
         
         const index = (bazi.pillars[0].charCodeAt(0) + bazi.pillars[1].charCodeAt(0) + 
                        bazi.pillars[2].charCodeAt(0) + bazi.pillars[3].charCodeAt(0)) % hexagrams.length;
         
-        const dominantElement = ['木', '火', '土', '金', '水'][bazi.elements.indexOf(Math.max(...bazi.elements))];
+        const dominantElement = ['木', '火', '土', '', '水'][bazi.elements.indexOf(Math.max(...bazi.elements))];
         
         return {
             hexagram: hexagrams[index],
@@ -373,7 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
             { name: '皇帝', meaning: '权威、领导力、结构、稳定' },
             { name: '教皇', meaning: '精神指引、传统、信仰、道德' },
             { name: '恋人', meaning: '爱情、和谐、关系、价值观' },
-            { name: '战车', meaning: '胜利、意志力、自制、决心' }
+            { name: '战车', meaning: '胜利、意志力、自制、心' }
         ];
         return tarotCards[Math.floor(Math.random() * tarotCards.length)];
     }
@@ -396,10 +435,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function getFateInterpretation(bazi, yijing, tarot) {
         const fateInterpretations = [
-            "您的命格独特，暗示着不平凡的人生轨迹。在未来的岁月里，您可能会遇到许多挑战，但这些挑战恰恰是您成长和成功的阶梯。保持放和积极的心态，勇于面对每一个机遇和挑战。",
-            "您的八字显示出强烈的创造力和领导潜质。在职业生涯中，您可能会在创新领域取得突破性的成就。但要注意平衡工作与生活，以确保全面的成功和幸福。",
+            "您的命格独特，暗示着不平凡的人生轨迹。在未来的岁月里，您可能会遇到许多挑战，但这些战恰恰是您成长和功的阶梯。保持放和积极的心态，勇于面对每一个机遇和挑战。",
+            "您的八字显示出强烈的创造力和导潜质。在职业生涯中，您可能会在创新领域取得突破性的成就。但要注意平衡工作与生活，以确保全面的成功和幸福。",
             "您的命盘呈现出和谐与平衡的特质。这预示着您在人际关系方面将会有出色的表现。善用您的外交才能，无论是在职场还是个人生活中，都能够建立有价值的人脉网络。",
-            "根据您的八字，您的一生可能会经历多次重大转折。这些转变虽然可能带来短暂的不适，但最终会引导您走向更好的方向。保持灵活性和适应能力，将助您在变化中找到机遇。",
+            "根据您的八字，您的一生可能会经历多次重大转折。这些转变虽然可能带来短暂的不适，但最终会引导您走向更好的方向。保持灵活性和适应能力将助您在变化中找到机遇。",
             "您的命格显示出强烈的学习欲望和智慧潜能。终身学习将是您成功的关键。不断充实自己，探索新的领域，您的知识和经验将成为您最有价值的资产。"
         ];
         
@@ -437,13 +476,13 @@ document.addEventListener('DOMContentLoaded', function() {
             "顺应天时，把握当下机遇",
             "培养内在修养，提升个人魅力",
             "保持谦逊态度，广结人缘",
-            "注重身心平衡，保持乐观积极",
+            "关注细节，精益求精",
             "勇于尝试新事物，拓展视野",
             "善用自身优势，发挥潜能",
             "学会取舍，专注于重要目标",
             "保持耐心，厚积薄发",
             "与贵人多交流，寻求指导",
-            "关注细节，精益求精"
+            "注重身心平衡，保持乐观积极"
         ];
         return advices[Math.floor(Math.random() * advices.length)];
     }

@@ -19,11 +19,13 @@
 }
 
 :root {
-    --primary-color: #007AFF;
-    --background-color: #000000;
-    --text-color: #FFFFFF;
+    --primary-color: #D4AF37; /* 金色 */
+    --secondary-color: #4B0082; /* 靛青色 */
+    --background-color: #0C0C0C; /* 深黑色 */
+    --text-color: #F5F5F5; /* 浅灰白色 */
     --input-background: #1C1C1E;
     --card-color: #1C1C1E;
+    --border-color: #333333;
 }
 
 body {
@@ -36,17 +38,42 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    background: linear-gradient(135deg, var(--background-color) 0%, #1c1c1e 100%);
+    background-attachment: fixed;
+    background-size: cover;
 }
 
 .container {
     max-width: 600px;
     width: 100%;
     padding: 2rem;
+    background-color: rgba(28, 28, 30, 0.8);
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    text-align: center;
+    border: none;
+    animation: none;
 }
 
-h1, h2 {
-    text-align: center;
-    font-weight: 700;
+@keyframes glowing {
+    from {
+        box-shadow: 0 0 5px #FFD700, 0 0 10px #FFD700;
+    }
+    to {
+        box-shadow: 0 0 10px #FFD700, 0 0 20px #FFD700;
+    }
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+h2, h3 {
+    color: #FFFFFF;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 form {
@@ -58,35 +85,55 @@ form {
 .input-group {
     display: flex;
     flex-direction: column;
+    text-align: left;
 }
 
 label {
     margin-bottom: 0.5rem;
     font-weight: 300;
+    color: var(--text-color);
 }
 
-input[type="text"], input[type="time"], select {
+input[type="text"], input[type="date"], select {
     padding: 0.75rem;
-    background-color: #FFFFFF;
-    border: 1px solid var(--primary-color);
+    background-color: var(--input-background);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
-    color: #000000;
+    color: var(--text-color);
     font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="date"]:focus, select:focus,
+input[type="text"]:not(:placeholder-shown), input[type="date"]:not(:placeholder-shown), select:not(:placeholder-shown) {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
 
 button {
-    background-color: var(--primary-color);
-    color: var(--text-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, #B8860B 100%);
+    color: var(--background-color);
     border: none;
     padding: 1rem;
     font-size: 1.1rem;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 button:hover {
-    background-color: #0056b3;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.7);
+}
+
+/* 时间选择样式 */
+.time-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.time-group select {
+    flex: 1;
 }
 
 #card-container {
@@ -101,8 +148,7 @@ button:hover {
     height: 100%;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    transition: opacity 0.5s ease-out;
+    transition: transform 1.5s;
 }
 
 .card-inner {
@@ -115,7 +161,7 @@ button:hover {
 }
 
 .card.flipped .card-inner {
-    transform: rotateY(1080deg);
+    transform: rotateY(180deg);
 }
 
 .card-front, .card-back {
@@ -123,16 +169,19 @@ button:hover {
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
-    border-radius: 15px;
     display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    align-items: center;
     background-color: var(--card-color);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 2px solid var(--primary-color);
+    border-radius: 15px;
 }
 
 .card-back {
+    transform: rotateY(180deg);
+}
+
+.card.flipped {
     transform: rotateY(180deg);
 }
 
@@ -142,6 +191,7 @@ button:hover {
     margin-bottom: 1.5rem;
     border-radius: 15px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: #FFFFFF;
 }
 
 .hidden {
@@ -149,36 +199,57 @@ button:hover {
 }
 
 .flatpickr-calendar {
-    background-color: #FFFFFF;
-    color: #000000;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: var(--card-color);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
     border: 1px solid var(--primary-color);
+    border-radius: 10px;
+}
+
+.flatpickr-month {
+    background-color: var(--card-color);
+    color: var(--primary-color);
+}
+
+.flatpickr-weekdays {
+    background-color: var(--card-color);
+}
+
+.flatpickr-weekday {
+    color: var(--text-color);
+    font-weight: bold;
 }
 
 .flatpickr-day {
-    color: #000000;
+    color: var(--text-color);
+    border-radius: 5px;
 }
 
-.flatpickr-day.selected {
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected.inRange, .flatpickr-day.startRange.inRange, .flatpickr-day.endRange.inRange, .flatpickr-day.selected:focus, .flatpickr-day.startRange:focus, .flatpickr-day.endRange:focus {
     background-color: var(--primary-color);
     border-color: var(--primary-color);
-    color: #FFFFFF;
+    color: var(--background-color);
 }
 
-.flatpickr-day:hover {
-    background-color: rgba(0, 122, 255, 0.1);
+.flatpickr-day.inRange, .flatpickr-day.prevMonthDay.inRange, .flatpickr-day.nextMonthDay.inRange, .flatpickr-day.today.inRange, .flatpickr-day.prevMonthDay.today.inRange, .flatpickr-day.nextMonthDay.today.inRange, .flatpickr-day:hover, .flatpickr-day.prevMonthDay:hover, .flatpickr-day.nextMonthDay:hover, .flatpickr-day:focus, .flatpickr-day.prevMonthDay:focus, .flatpickr-day.nextMonthDay:focus {
+    background-color: rgba(212, 175, 55, 0.3);
+    border-color: transparent;
 }
 
-.flatpickr-current-month, .flatpickr-monthDropdown-months, .flatpickr-weekday {
-    color: #000000;
+.flatpickr-current-month .flatpickr-monthDropdown-months, .flatpickr-current-month input.cur-year {
+    color: var(--text-color);
 }
 
-.flatpickr-time input, .flatpickr-time .flatpickr-time-separator, .flatpickr-time .flatpickr-am-pm {
-    color: #000000;
+.flatpickr-current-month .flatpickr-monthDropdown-months:hover, .flatpickr-current-month input.cur-year:hover {
+    background-color: rgba(212, 175, 55, 0.1);
 }
 
 .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month {
-    fill: #000000;
+    color: var(--primary-color);
+    fill: var(--primary-color);
+}
+
+.flatpickr-months .flatpickr-prev-month:hover svg, .flatpickr-months .flatpickr-next-month:hover svg {
+    fill: var(--text-color);
 }
 
 #result {
@@ -202,16 +273,14 @@ button:hover {
 }
 
 .modal-content {
-    background-color: var(--background-color);
+    background: linear-gradient(135deg, #1c1c1e 0%, #2c2c2e 100%);
+    border-radius: 30px;
+    padding: 30px;
+    width: 100%;
+    max-width: 600px; /* 与首页容器宽度一致 */
     margin: 5% auto;
-    padding: 20px;
-    border: 1px solid var(--primary-color);
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    overflow-y: auto;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    border: none; /* 移除金色边框 */
 }
 
 .close {
@@ -229,10 +298,10 @@ button:hover {
     cursor: pointer;
 }
 
-/* 删除 .modal.show 类，因为我们现在使用 style.display 来控制显示 */
+/* 删除 .modal.show 类，因为我们现在使用 style.display 控制显示 */
 
 .result-section {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(28, 28, 30, 0.8);
     backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 20px;
@@ -255,7 +324,7 @@ button:hover {
 }
 
 .result-section strong {
-    color: #fff;
+    color: #FFFFFF;
 }
 
 .modal-content {
@@ -285,24 +354,75 @@ button:hover {
 }
 
 .card {
-    box-shadow: 0 0 20px rgba(0, 122, 255, 0.5);
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
 }
 
 .card-front, .card-back {
-    background: linear-gradient(135deg, #2c2c2e 0%, #1c1c1e 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--card-color);
     border: 2px solid var(--primary-color);
+    border-radius: 15px;
+    padding: 20px;
 }
 
-body {
-    background: linear-gradient(135deg, #000000 0%, #1c1c1e 100%);
+.phrase-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    padding: 20px;
 }
 
-button {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #0056b3 100%);
-    transition: all 0.3s ease;
+.phrase {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-size: 24px;
+    letter-spacing: 5px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(0, 122, 255, 0.7);
+.phrase.left {
+    justify-content: flex-start;
+}
+
+.phrase.right {
+    justify-content: flex-end;
+}
+
+.phrase.center {
+    font-size: 36px;
+    color: var(--primary-color);
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+}
+
+.card-front, .card-back {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 15px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.card {
+    transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1), filter 3s ease;
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-top: 0.5rem;
+}
+
+.card {
+    transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
