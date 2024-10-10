@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神秘八字算命</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>神秘八字算命</h1>
+        <form id="fortuneForm">
+            <div class="input-group">
+                <label for="name">姓名</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="input-group">
+                <label for="birthdate">出生日期</label>
+                <input type="text" id="birthdate" required>
+            </div>
+            <div class="input-group">
+                <label for="birthtime-hour">出生时间</label>
+                <select id="birthtime-hour" required>
+                    <option value="">选择时</option>
+                </select>
+            </div>
+            <div class="input-group hidden" id="minute-group">
+                <label for="birthtime-minute">出生分钟</label>
+                <select id="birthtime-minute" required>
+                    <option value="">选择分钟</option>
+                </select>
+            </div>
+            <button type="submit">揭示天机</button>
+        </form>
+    </div>
+    
+    <div id="resultModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="card-container">
+                <div class="card">
+                    <div class="card-inner">
+                        <div class="card-front"></div>
+                        <div class="card-back"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="result" class="hidden">
+                <h2>命运揭示</h2>
+                <div id="nameAnalysis" class="result-section"></div>
+                <div id="bazi" class="result-section"></div>
+                <div id="yijing" class="result-section"></div>
+                <div id="tarot" class="result-section"></div>
+                <div id="astrology" class="result-section"></div>
+                <div id="crystalBall" class="result-section"></div>
+                <div id="palmistry" class="result-section"></div>
+                <div id="fortune" class="result-section"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="script.js"></script>
+</body>
+</html>

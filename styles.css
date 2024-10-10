@@ -1,0 +1,232 @@
+@keyframes move-background {
+    from {
+        transform: translate3d(0px, 0px, 0px);
+    }
+    to { 
+        transform: translate3d(1000px, 0px, 0px);
+    }
+}
+
+@keyframes rotate-card {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(720deg); }
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700, 0 0 20px #ffd700; }
+    50% { box-shadow: 0 0 10px #ffd700, 0 0 20px #ffd700, 0 0 30px #ffd700, 0 0 40px #ffd700; }
+    100% { box-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700, 0 0 15px #ffd700, 0 0 20px #ffd700; }
+}
+
+:root {
+    --primary-color: #007AFF;
+    --background-color: #000000;
+    --text-color: #FFFFFF;
+    --input-background: #1C1C1E;
+    --card-color: #1C1C1E;
+}
+
+body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 600px;
+    width: 100%;
+    padding: 2rem;
+}
+
+h1, h2 {
+    text-align: center;
+    font-weight: 700;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    margin-bottom: 0.5rem;
+    font-weight: 300;
+}
+
+input[type="text"], input[type="time"], select {
+    padding: 0.75rem;
+    background-color: #FFFFFF;
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    color: #000000;
+    font-size: 1rem;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: var(--text-color);
+    border: none;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#card-container {
+    perspective: 1000px;
+    width: 300px;
+    height: 450px;
+    margin: 2rem auto;
+}
+
+.card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: opacity 0.5s ease-out;
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform-style: preserve-3d;
+}
+
+.card.flipped .card-inner {
+    transform: rotateY(1080deg);
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    background-color: var(--card-color);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-back {
+    transform: rotateY(180deg);
+}
+
+.result-section {
+    background-color: var(--card-color);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.hidden {
+    display: none;
+}
+
+.flatpickr-calendar {
+    background-color: #FFFFFF;
+    color: #000000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--primary-color);
+}
+
+.flatpickr-day {
+    color: #000000;
+}
+
+.flatpickr-day.selected {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #FFFFFF;
+}
+
+.flatpickr-day:hover {
+    background-color: rgba(0, 122, 255, 0.1);
+}
+
+.flatpickr-current-month, .flatpickr-monthDropdown-months, .flatpickr-weekday {
+    color: #000000;
+}
+
+.flatpickr-time input, .flatpickr-time .flatpickr-time-separator, .flatpickr-time .flatpickr-am-pm {
+    color: #000000;
+}
+
+.flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month {
+    fill: #000000;
+}
+
+#result {
+    opacity: 0;
+    transition: opacity 0.5s ease-in;
+    margin-top: 2rem;
+}
+
+/* 在文件末尾添加以下样式 */
+
+.modal {
+    display: none; /* 默认隐藏 */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: var(--background-color);
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid var(--primary-color);
+    width: 90%;
+    max-width: 600px;
+    max-height: 80vh;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    overflow-y: auto;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: var(--primary-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* 删除 .modal.show 类，因为我们现在使用 style.display 来控制显示 */
